@@ -7,7 +7,6 @@
 
 import sys
 import re
-import numpy as np
 import pandas as pd
 
 # check spectrum for presence of expected candidate fragments
