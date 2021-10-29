@@ -70,15 +70,20 @@ def add_candidate(candidates, entry, cand_count):
 def main():
 
     # first test with one file specified as argument
-    if(len(sys.argv) < 2):
-        print("specify mgf file")
-        exit(1)
+    if len(sys.argv) < 2:
+        sys.exit("Specify mgf file!")
     else:
         mgf_path = sys.argv[1]
 
     # read in mgf file and split on "END IONS"
     with open(mgf_path, 'r') as mgf_con:
-        entries = mgf_con.read().split("END IONS")
+        mgf_content = mgf_con.read()
+        if mgf_content == '':
+            sys.exit("Empty mgf provided.")
+        elif not mgf_content.splitlines()[0].startswith("BEGIN IONS"):
+            sys.exit("Formatting not supported.")
+        else:
+            entries = mgf_con.read().split("END IONS")
     
     # add "END IONS" to each entry again, not necessary at the moment
     for n, entry in enumerate(entries):
@@ -95,7 +100,7 @@ def main():
             cand_count += 1
         
     # save candidates list if not empty
-    if(len(candidates) > 1):
+    if len(candidates) > 1:
         csv_name = str(mgf_path) + "_candidates.csv"
         candidates.to_csv(csv_name, index=False)
     else:
