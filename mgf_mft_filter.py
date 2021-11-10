@@ -1,7 +1,7 @@
 # python script for the filtering of ms2 spectra in mgf format regarding potential mycofactocin species
 # spectra are extracted from raw files using MSConvert with msLevel 2-2 and output format .mgf
 # all spectra are scanned for the presence of fragments with 5 ppm tolerance:
-# 107.0495, 136.0755 234.1125, 235.1441, 236.1281
+# 107.0495, 136.0755, 234.1125, 235.1441, 236.1281
 # written by Ellerhorst, Mark 2021
 # tested on python 3.9.5
 
@@ -15,7 +15,7 @@ def frag_check(entry):
     
     # calculate 5 ppm tolerance range for target fragments
     tol = 5e-06
-    fragments = [234.1125, 235.1441, 236.1281]
+    fragments = [107.0495, 136.0755, 236.1281]
     fragments_df = pd.DataFrame(fragments, columns = ['exact_mass'])
     fragments_df['delta_mass'] = fragments_df['exact_mass'] * tol
     fragments_df['min_mass'] = fragments_df['exact_mass'] - fragments_df['delta_mass']
@@ -34,7 +34,7 @@ def frag_check(entry):
     # bring spectrum into dataframe and convert str to float
     spectrum_df = pd.DataFrame([line.split(' ') for line in spectrum], columns = ['mz', 'intensity'])
     spectrum_df = spectrum_df.astype(float)
-    
+        
     # check if fragments in spectrum with 5 ppm range
     count = 0
     for index, frag in fragments_df.iterrows():
@@ -78,17 +78,18 @@ def main():
     # read in mgf file and split on "END IONS"
     with open(mgf_path, 'r') as mgf_con:
         mgf_content = mgf_con.read()
+
         if mgf_content == '':
             sys.exit("Empty mgf provided.")
         elif not mgf_content.splitlines()[0].startswith("BEGIN IONS"):
             sys.exit("Formatting not supported.")
         else:
-            entries = mgf_con.read().split("END IONS")
+            entries = mgf_content.split("END IONS")
     
     # add "END IONS" to each entry again, not necessary at the moment
     for n, entry in enumerate(entries):
         entries[n] = entry + "END IONS"
-    
+      
     # scan each entry for presence of fragments:
     candidates = pd.DataFrame(columns=['precursor_mz', 'rt_min', 'candidate'])
     
