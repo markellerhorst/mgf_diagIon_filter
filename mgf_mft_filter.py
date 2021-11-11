@@ -51,11 +51,11 @@ def frag_check(entry, mft_form):
         for mz in spectrum_df.mz.values:
             if (frag['min_mass'] <= mz and frag['max_mass'] >= mz):
                 count += 1
-                if mz == 234.1125 or mz == 235.1441 or mz == 236.1281:
+                if frag['exact_mass'] == 234.1125 or frag['exact_mass'] == 235.1441 or frag['exact_mass'] == 236.1281:
                     aglycon = True
-            
-    # return true if at least one aglycon mass found
-    if count > 0 and aglycon:
+                    
+    # return true if at least the aglycon mass and one fragment found
+    if count > 1 and aglycon:
         return True
     
     return False
@@ -115,7 +115,7 @@ def main():
         
     # save candidates list if not empty
     if len(candidates) > 1:
-        csv_name = str(mgf_path) + "_candidates" + str(mft_form) + ".csv"
+        csv_name = str(mgf_path) + "_candidates_" + str(mft_form) + ".csv"
         candidates.to_csv(csv_name, index=False)
     else:
         print("No candidates found.")
