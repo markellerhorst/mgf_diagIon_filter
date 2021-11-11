@@ -22,7 +22,7 @@ def frag_check(entry, mft_form):
         fragments = [107.0495, 136.0755, 234.1125]
     elif mft_form.lower() == 'red':
         fragments = [107.0495, 136.0755, 236.1281]
-    elif mft_form.lower() = 'pre':
+    elif mft_form.lower() == 'pre':
         fragments = [107.0495, 136.0755, 235.1441]
     
     fragments_df = pd.DataFrame(fragments, columns = ['exact_mass'])
@@ -115,7 +115,7 @@ def main():
         
     # save candidates list if not empty
     if len(candidates) > 1:
-        csv_name = str(mgf_path) + "_candidates.csv"
+        csv_name = str(mgf_path) + "_candidates" + str(mft_form) + ".csv"
         candidates.to_csv(csv_name, index=False)
     else:
         print("No candidates found.")
