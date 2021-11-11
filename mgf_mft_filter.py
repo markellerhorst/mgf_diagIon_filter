@@ -11,11 +11,20 @@ import numpy as np
 import pandas as pd
 
 # check spectrum for presence of expected candidate fragments
-def frag_check(entry):
+def frag_check(entry, mft_form):
     
     # calculate 5 ppm tolerance range for target fragments
     tol = 5e-06
-    fragments = [107.0495, 136.0755, 236.1281]
+    fragments = []
+    
+    # select mft form to be checked for
+    if mft_form.lower() == 'ox':
+        fragments = [107.0495, 136.0755, 234.1125]
+    elif mft_form.lower() == 'red':
+        fragments = [107.0495, 136.0755, 236.1281]
+    elif mft_form.lower() = 'pre':
+        fragments = [107.0495, 136.0755, 235.1441]
+    
     fragments_df = pd.DataFrame(fragments, columns = ['exact_mass'])
     fragments_df['delta_mass'] = fragments_df['exact_mass'] * tol
     fragments_df['min_mass'] = fragments_df['exact_mass'] - fragments_df['delta_mass']
@@ -37,13 +46,16 @@ def frag_check(entry):
         
     # check if fragments in spectrum with 5 ppm range
     count = 0
+    aglycon = False
     for index, frag in fragments_df.iterrows():
         for mz in spectrum_df.mz.values:
             if (frag['min_mass'] <= mz and frag['max_mass'] >= mz):
                 count += 1
+                if mz == 234.1125 or mz == 235.1441 or mz == 236.1281:
+                    aglycon = True
             
     # return true if at least one aglycon mass found
-    if count > 0:
+    if count > 0 and aglycon:
         return True
     
     return False
@@ -70,10 +82,11 @@ def add_candidate(candidates, entry, cand_count):
 def main():
 
     # first test with one file specified as argument
-    if len(sys.argv) < 2:
-        sys.exit("Specify mgf file!")
+    if len(sys.argv) < 3:
+        sys.exit("'Usage: python mgf_mft_filter.py file.mgf ox|red|pre")
     else:
         mgf_path = sys.argv[1]
+        mft_form = sys.argv[2]
 
     # read in mgf file and split on "END IONS"
     with open(mgf_path, 'r') as mgf_con:
@@ -96,7 +109,7 @@ def main():
     # search each spectrum in mgf for fragments of interest
     cand_count = 0
     for index, entry in enumerate(entries):
-        if frag_check(entry):
+        if frag_check(entry, mft_form):
             candidates = add_candidate(candidates, entries[index], cand_count)
             cand_count += 1
         
